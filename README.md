@@ -1,2 +1,2 @@
 # Ventilator_Associated_Event
-This UMich SI 542 Course Project.
+This is UMich SI 542 Course Project.
