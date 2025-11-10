@@ -5,24 +5,24 @@ def input_patient_data() -> Dict[str, any]:
     """Collects clinical parameters of a single patient from user input"""
     patient_data = {
         "age": int(input("Enter patient's age (years): ")),
-        "intubation_route": input("Enter intubation route (orotracheal/nasotracheal): ").strip().lower(),
+        "intubation_route": input("Enter intubation route (endotracheal/nasotracheal): ").strip().lower(),
         "ventilation_duration_h": int(input("Enter duration of mechanical ventilation (hours): ")),
         "subglottic_drainage": input("Is subglottic secretion drainage used? (yes/no): ").strip().lower(),
         "bed_head_elevation_deg": int(input("Enter bed head elevation angle (degrees): ")),
         "closed_suction_system": input("Is closed endotracheal suctioning system used? (yes/no): ").strip().lower(),
         "oral_antiseptic": input("Enter oral antiseptic used (chlorhexidine/povidone-iodine/none): ").strip().lower(),
-        "fever": input("Does the patient have fever? (yes/no): ").strip().lower(),
-        "leukocytosis": input("Does the patient have leukocytosis? (yes/no): ").strip().lower(),
+        "fever": input("Does the patient have a temperature of more than 38.0°C? (yes/no): ").strip().lower(),
+        "leukocytosis": input("Does the patient have a WBC count ≤ 4,000 or ≥ 12,000 cells/mm³? (yes/no): ").strip().lower(),
         "chest_radiograph": input("Does chest radiograph show new infiltrates? (yes/no): ").strip().lower()
     }
     
     # Validate inputs
-    valid_routes = ["orotracheal", "nasotracheal"]
+    valid_routes = ["endotracheal", "nasotracheal"]
     valid_antiseptics = ["chlorhexidine", "povidone-iodine", "none"]
     valid_booleans = ["yes", "no"]
     
     if patient_data["intubation_route"] not in valid_routes:
-        raise ValueError("Intubation route must be 'orotracheal' or 'nasotracheal'")
+        raise ValueError("Intubation route must be 'endotracheal' or 'nasotracheal'")
     if patient_data["oral_antiseptic"] not in valid_antiseptics:
         raise ValueError("Oral antiseptic must be 'chlorhexidine', 'povidone-iodine', or 'none'")
     if patient_data["subglottic_drainage"] not in valid_booleans:
@@ -37,13 +37,15 @@ def calculate_vap_risk(patient_data: Dict[str, any]) -> int:
     # Intubation route
     if patient_data["intubation_route"] == "nasotracheal":
         risk_score += 3
-    elif patient_data["intubation_route"] == "orotracheal":
+    elif patient_data["intubation_route"] == "endotracheal":
         risk_score -= 2
 
     # Duration of mechanical ventilation
     if patient_data["ventilation_duration_h"] > 72:
         risk_score += 3
-    elif 24 <= patient_data["ventilation_duration_h"] <= 72:
+    elif 24 <= patient_data["ventilation_duration_h"] <= 48:
+        risk_score += 2
+    elif patient_data["ventilation_duration_h"] < 24:
         risk_score += 1
 
     # Subglottic secretion drainage
@@ -58,6 +60,8 @@ def calculate_vap_risk(patient_data: Dict[str, any]) -> int:
         risk_score -= 2
     elif patient_data["bed_head_elevation_deg"] < 30:
         risk_score += 2
+    elif 30 <= patient_data["bed_head_elevation_deg"] < 45:
+        risk_score += 1
 
     # Closed suction system
     if patient_data["closed_suction_system"] == "yes":
@@ -85,30 +89,27 @@ def determine_risk_level(risk_score: int) -> Dict[str, str]:
     if risk_score < 5:
         return {
             "risk_level": "Low Risk",
-            "case_control_ratio": "Cases (8, 3.2%); Controls (242, 96.8%)",
             "explanation": "Patient presents with minimal risk factors for VAP development",
             "recommendation": (
                 "   - Routine mechanical ventilation care; replace heat and moisture exchangers weekly (if not contaminated)\n"
                 "   - Monitor WBC count and chest imaging once weekly\n"
-                "   - Immediately recheck relevant indicators if fever (≥38℃) occurs"
+                "   - Immediately recheck relevant indicators if fever (≥38°C) occurs"
             )
         }
     elif 5 <= risk_score <= 12:
         return {
             "risk_level": "Moderate Risk",
-            "case_control_ratio": "Cases (48, 31.5%); Controls (104, 68.5%)",
             "explanation": "Patient has several risk factors that warrant closer monitoring",
             "recommendation": (
                 "   - Closely monitor mechanical ventilation duration; prepare for subglottic drainage if ≥72h is expected\n"
                 "   - Recheck WBC count and oxygenation index every 2 days\n"
-                "   - Maintain head-of-bed elevation at 30-45°; avoid supine position\n"
+                "   - Maintain head-of-bed elevation as close to 45° as possible; avoid supine position\n"
                 "   - Implement oral antiseptic rinses (chlorhexidine/povidone-iodine) as preventive measure"
             )
         }
     else:
         return {
             "risk_level": "High Risk",
-            "case_control_ratio": "Cases (156, 78.4%); Controls (43, 21.6%)",
             "explanation": "Patient meets multiple high-risk criteria for VAP development",
             "recommendation": (
                 "   - Immediately initiate subglottic secretion drainage (for patients with ventilation ≥72h)\n"
@@ -142,12 +143,12 @@ def generate_risk_report(patient_data: Dict[str, any], risk_score: int, risk_ass
 
     # Visualize risk score (retained from strategy2)
     plt.figure(figsize=(10, 4))
-    bars = plt.bar(
-        ["Low Risk (0-4)", "Medium Risk (5-12)", "High Risk (13-20)"],
-        [4, 12, 20],
-        color=["#2ecc71", "#f39c12", "#e74c3c"],
-        alpha=0.3
-    )
+    # bars = plt.bar(
+    #     ["Low Risk (0-4)", "Medium Risk (5-12)", "High Risk (13-20)"],
+    #     [4, 12, 20],
+    #     color=["#2ecc71", "#f39c12", "#e74c3c"],
+    #     alpha=0.3
+    # )
     
     risk_labels = ["Low Risk (0-4)", "Medium Risk (5-12)", "High Risk (13-20)"]
     risk_index = 0 if risk_score < 5 else 1 if risk_score <= 12 else 2
