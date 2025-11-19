@@ -142,12 +142,12 @@ def generate_risk_report(patient_data: Dict[str, any], risk_score: int, risk_ass
 
     # Visualize risk score (retained from strategy2)
     plt.figure(figsize=(10, 4))
-    # bars = plt.bar(
-    #     ["Low Risk (0-4)", "Medium Risk (5-12)", "High Risk (13-20)"],
-    #     [4, 12, 20],
-    #     color=["#2ecc71", "#f39c12", "#e74c3c"],
-    #     alpha=0.3
-    # )
+    bars = plt.bar(
+        ["Low Risk (0-4)", "Medium Risk (5-12)", "High Risk (13-20)"],
+        [4, 12, 20],
+        color=["#2ecc71", "#f39c12", "#e74c3c"],
+        alpha=0.3
+    )
     
     risk_labels = ["Low Risk (0-4)", "Medium Risk (5-12)", "High Risk (13-20)"]
     risk_index = 0 if risk_score < 5 else 1 if risk_score <= 12 else 2
