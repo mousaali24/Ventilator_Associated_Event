@@ -134,7 +134,6 @@ def generate_risk_report(patient_data: Dict[str, any], risk_score: int, risk_ass
     
     print(f"\n1. Risk Level: {risk_assessment['risk_level']}")
     print(f"2. Risk Score: {risk_score}/20")
-    print(f"3. Case/Control Risk Ratio: {risk_assessment['case_control_ratio']}")
     print(f"4. Assessment Rationale: {risk_assessment['explanation']}")
     
     print("\n5. Clinical Recommendations:")
